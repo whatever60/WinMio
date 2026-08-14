@@ -51,6 +51,7 @@ class SelectionWindow: NSWindow {
     private var escapeKeyMonitor: Any?
     private var localEscapeKeyMonitor: Any?
     private var hasCommitted = false
+    private var hidesSystemCursor = false
 
     init(
         frozenScreens: [CGDirectDisplayID: CaptureImage],
@@ -180,7 +181,7 @@ class SelectionWindow: NSWindow {
             window.ignoresMouseEvents = true
         }
         captureToolbar?.hide()
-        NSCursor.arrow.set()
+        setSystemCursorHidden(false)
     }
 
     private func showPreview(_ selection: VirtualDesktopSelection?) {
@@ -197,7 +198,13 @@ class SelectionWindow: NSWindow {
     }
 
     private func updateCursor() {
-        (mode == .rectangle || mode == .freeform ? NSCursor.crosshair : .arrow).set()
+        setSystemCursorHidden(mode == .rectangle || mode == .freeform)
+    }
+
+    private func setSystemCursorHidden(_ hidden: Bool) {
+        guard hidden != hidesSystemCursor else { return }
+        hidesSystemCursor = hidden
+        hidden ? NSCursor.hide() : NSCursor.unhide()
     }
 
     private func cancel() { selectionDelegate?.selectionWindowDidCancel(self) }
@@ -259,6 +266,7 @@ class SelectionOverlayView: NSView {
     private var hoverWindowHit: WindowHitTestResult?
     private var highlightRect: NSRect?
     private var trackingArea: NSTrackingArea?
+    private var crosshairPoint: NSPoint?
 
     init(frame: NSRect,
          configuration: Configuration = .screenshot,
@@ -301,16 +309,6 @@ class SelectionOverlayView: NSView {
         trackingArea = area
     }
 
-    override func resetCursorRects() {
-        super.resetCursorRects()
-        let cursor: NSCursor = mode == .rectangle || mode == .freeform ? .crosshair : .arrow
-        addCursorRect(bounds, cursor: cursor)
-    }
-
-    override func cursorUpdate(with event: NSEvent) {
-        (mode == .rectangle || mode == .freeform ? NSCursor.crosshair : .arrow).set()
-    }
-
     // CRITICAL: Accept first mouse click even when app is not active
     // Without this, users need to click twice when Finder/Desktop is frontmost
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
@@ -337,6 +335,9 @@ class SelectionOverlayView: NSView {
     /// `hoverWindowHit` 与 `pendingWindowHit` 不被 `draw` 读取。所以本方法能够
     /// 影响绘制结果的状态**只有** `highlightRect` —— 它没变就意味着帧内容没变。
     override func mouseMoved(with event: NSEvent) {
+        if mode == .rectangle || mode == .freeform {
+            moveCrosshair(to: convert(event.locationInWindow, from: nil))
+        }
         guard !isDragging, mode == .window else { return }
         let previousHighlight = highlightRect
         hoverWindowHit = resolveWindowHit()   // 副作用：写 highlightRect
@@ -358,6 +359,7 @@ class SelectionOverlayView: NSView {
     }
 
     override func mouseDragged(with event: NSEvent) {
+        mouseMoved(with: event)
         guard isDragging else { return }
         endPoint = globalPoint(for: event)
         guard let start = startPoint, let end = endPoint else { return }
@@ -413,6 +415,7 @@ class SelectionOverlayView: NSView {
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
+        defer { drawCrosshair() }
 
         // Step 1: paint the frozen full-screen snapshot as the background.
         // PRODUCT.md §2: every screen is frozen at trigger time and the user
@@ -448,6 +451,18 @@ class SelectionOverlayView: NSView {
 
     private func globalPoint(for event: NSEvent) -> CGPoint? {
         window?.convertToScreen(CGRect(origin: event.locationInWindow, size: .zero)).origin
+    }
+
+    private func moveCrosshair(to point: NSPoint) {
+        [crosshairPoint, point].compactMap { $0 }.forEach { setNeedsDisplay(CGRect(origin: $0, size: .zero).insetBy(dx: -12, dy: -12)) }
+        crosshairPoint = point
+    }
+
+    private func drawCrosshair() {
+        guard mode == .rectangle || mode == .freeform, let window else { return }
+        let cursor = NSCursor.crosshair
+        let point = crosshairPoint ?? convert(window.convertPoint(fromScreen: NSEvent.mouseLocation), from: nil)
+        cursor.image.draw(at: NSPoint(x: point.x - cursor.hotSpot.x, y: point.y - cursor.hotSpot.y), from: .zero, operation: .sourceOver, fraction: 1)
     }
 
     private func rect(from a: CGPoint, to b: CGPoint) -> CGRect {
