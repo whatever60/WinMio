@@ -161,8 +161,7 @@ class SelectionWindow: NSWindow {
         }
         captureToolbar?.show()
         (overlayWindows.first { $0.frame.contains(NSEvent.mouseLocation) } ?? overlayWindows.first)?.makeKey()
-        overlayViews.forEach { $0.window?.invalidateCursorRects(for: $0) }
-        updateCursor()
+        setSystemCursorHidden(mode == .rectangle || mode == .freeform)
     }
 
     func hide() {
@@ -193,12 +192,8 @@ class SelectionWindow: NSWindow {
         showPreview(nil)
         overlayViews.forEach { $0.mode = mode }
         (overlayWindows.first { $0.frame.contains(NSEvent.mouseLocation) } ?? overlayWindows.first)?.makeKey()
-        updateCursor()
-        if mode == .fullScreen { commitFullScreen() }
-    }
-
-    private func updateCursor() {
         setSystemCursorHidden(mode == .rectangle || mode == .freeform)
+        if mode == .fullScreen { commitFullScreen() }
     }
 
     private func setSystemCursorHidden(_ hidden: Bool) {
@@ -303,7 +298,7 @@ class SelectionOverlayView: NSView {
         if let trackingArea {
             removeTrackingArea(trackingArea)
         }
-        let options: NSTrackingArea.Options = [.mouseMoved, .cursorUpdate, .activeAlways, .inVisibleRect]
+        let options: NSTrackingArea.Options = [.mouseMoved, .activeAlways, .inVisibleRect]
         let area = NSTrackingArea(rect: .zero, options: options, owner: self, userInfo: nil)
         addTrackingArea(area)
         trackingArea = area
