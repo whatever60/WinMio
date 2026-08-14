@@ -51,7 +51,7 @@ class SelectionWindow: NSWindow {
     private var escapeKeyMonitor: Any?
     private var localEscapeKeyMonitor: Any?
     private var hasCommitted = false
-    private var hidesSystemCursor = false
+    private var previousApplication: NSRunningApplication?
 
     init(
         frozenScreens: [CGDirectDisplayID: CaptureImage],
@@ -153,15 +153,15 @@ class SelectionWindow: NSWindow {
             }
         }
 
-        // Show all overlay windows without activating the app (prevents stealing focus).
-        // SelectionOverlayView.acceptsFirstMouse(for:) ensures the first click is still handled.
+        previousApplication = NSWorkspace.shared.frontmostApplication
+        NSApp.activate(ignoringOtherApps: true)
         for window in overlayWindows {
             window.ignoresMouseEvents = false
             window.orderFrontRegardless()
         }
         captureToolbar?.show()
         (overlayWindows.first { $0.frame.contains(NSEvent.mouseLocation) } ?? overlayWindows.first)?.makeKey()
-        setSystemCursorHidden(mode == .rectangle || mode == .freeform)
+        updateCursor()
     }
 
     func hide() {
@@ -180,7 +180,9 @@ class SelectionWindow: NSWindow {
             window.ignoresMouseEvents = true
         }
         captureToolbar?.hide()
-        setSystemCursorHidden(false)
+        NSCursor.arrow.set()
+        previousApplication?.activate(options: [])
+        previousApplication = nil
     }
 
     private func showPreview(_ selection: VirtualDesktopSelection?) {
@@ -192,17 +194,12 @@ class SelectionWindow: NSWindow {
         showPreview(nil)
         overlayViews.forEach { $0.mode = mode }
         (overlayWindows.first { $0.frame.contains(NSEvent.mouseLocation) } ?? overlayWindows.first)?.makeKey()
-        setSystemCursorHidden(mode == .rectangle || mode == .freeform)
+        updateCursor()
         if mode == .fullScreen { commitFullScreen() }
     }
 
-    private func setSystemCursorHidden(_ hidden: Bool) {
-        guard hidden != hidesSystemCursor else { return }
-        hidesSystemCursor = hidden
-        for screen in NSScreen.screens {
-            guard let displayID = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID else { continue }
-            _ = hidden ? CGDisplayHideCursor(displayID) : CGDisplayShowCursor(displayID)
-        }
+    private func updateCursor() {
+        (mode == .rectangle || mode == .freeform ? NSCursor.crosshair : NSCursor.arrow).set()
     }
 
     private func cancel() { selectionDelegate?.selectionWindowDidCancel(self) }
@@ -264,7 +261,6 @@ class SelectionOverlayView: NSView {
     private var hoverWindowHit: WindowHitTestResult?
     private var highlightRect: NSRect?
     private var trackingArea: NSTrackingArea?
-    private var crosshairPoint: NSPoint?
 
     init(frame: NSRect,
          configuration: Configuration = .screenshot,
@@ -333,9 +329,6 @@ class SelectionOverlayView: NSView {
     /// `hoverWindowHit` 与 `pendingWindowHit` 不被 `draw` 读取。所以本方法能够
     /// 影响绘制结果的状态**只有** `highlightRect` —— 它没变就意味着帧内容没变。
     override func mouseMoved(with event: NSEvent) {
-        if mode == .rectangle || mode == .freeform {
-            moveCrosshair(to: convert(event.locationInWindow, from: nil))
-        }
         guard !isDragging, mode == .window else { return }
         let previousHighlight = highlightRect
         hoverWindowHit = resolveWindowHit()   // 副作用：写 highlightRect
@@ -357,7 +350,6 @@ class SelectionOverlayView: NSView {
     }
 
     override func mouseDragged(with event: NSEvent) {
-        mouseMoved(with: event)
         guard isDragging else { return }
         endPoint = globalPoint(for: event)
         guard let start = startPoint, let end = endPoint else { return }
@@ -413,7 +405,6 @@ class SelectionOverlayView: NSView {
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
-        defer { drawCrosshair() }
 
         // Step 1: paint the frozen full-screen snapshot as the background.
         // PRODUCT.md §2: every screen is frozen at trigger time and the user
@@ -445,22 +436,15 @@ class SelectionOverlayView: NSView {
 
     override var acceptsFirstResponder: Bool { true }
 
+    override func resetCursorRects() {
+        super.resetCursorRects()
+        addCursorRect(bounds, cursor: mode == .rectangle || mode == .freeform ? .crosshair : .arrow)
+    }
+
     // MARK: - Private helpers
 
     private func globalPoint(for event: NSEvent) -> CGPoint? {
         window?.convertToScreen(CGRect(origin: event.locationInWindow, size: .zero)).origin
-    }
-
-    private func moveCrosshair(to point: NSPoint) {
-        [crosshairPoint, point].compactMap { $0 }.forEach { setNeedsDisplay(CGRect(origin: $0, size: .zero).insetBy(dx: -12, dy: -12)) }
-        crosshairPoint = point
-    }
-
-    private func drawCrosshair() {
-        guard mode == .rectangle || mode == .freeform, let window else { return }
-        let cursor = NSCursor.crosshair
-        let point = crosshairPoint ?? convert(window.convertPoint(fromScreen: NSEvent.mouseLocation), from: nil)
-        cursor.image.draw(at: NSPoint(x: point.x - cursor.hotSpot.x, y: point.y - cursor.hotSpot.y), from: .zero, operation: .sourceOver, fraction: 1)
     }
 
     private func rect(from a: CGPoint, to b: CGPoint) -> CGRect {
