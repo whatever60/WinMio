@@ -158,9 +158,10 @@ class SelectionWindow: NSWindow {
             window.ignoresMouseEvents = false
             window.orderFrontRegardless()
         }
-        (overlayWindows.first { $0.frame.contains(NSEvent.mouseLocation) } ?? overlayWindows.first)?.makeKey()
         captureToolbar?.show()
-        updateCursor()
+        (overlayWindows.first { $0.frame.contains(NSEvent.mouseLocation) } ?? overlayWindows.first)?.makeKey()
+        overlayViews.forEach { $0.window?.invalidateCursorRects(for: $0) }
+        DispatchQueue.main.async { [weak self] in self?.updateCursor() }
     }
 
     func hide() {

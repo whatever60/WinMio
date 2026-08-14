@@ -60,13 +60,14 @@ struct CaptureToolbarView: View {
           onMode(mode)
         } label: {
           Image(systemName: mode.systemImage)
-            .frame(width: 44, height: 40)
+            .frame(width: 40, height: 40)
             .foregroundStyle(self.mode == mode ? Color.white : Color.primary)
             .background(
               self.mode == mode
                 ? Color.accentColor
                 : hoveredMode == mode ? Color.primary.opacity(0.12) : Color.clear,
               in: RoundedRectangle(cornerRadius: 7))
+            .frame(width: 44, height: 40)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain).help(mode.title).accessibilityLabel(mode.title)
