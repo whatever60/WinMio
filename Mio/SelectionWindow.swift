@@ -297,7 +297,7 @@ class SelectionOverlayView: NSView {
         if let trackingArea {
             removeTrackingArea(trackingArea)
         }
-        let options: NSTrackingArea.Options = [.mouseMoved, .activeAlways, .inVisibleRect]
+        let options: NSTrackingArea.Options = [.mouseMoved, .cursorUpdate, .activeAlways, .inVisibleRect]
         let area = NSTrackingArea(rect: .zero, options: options, owner: self, userInfo: nil)
         addTrackingArea(area)
         trackingArea = area
@@ -329,6 +329,7 @@ class SelectionOverlayView: NSView {
     /// `hoverWindowHit` 与 `pendingWindowHit` 不被 `draw` 读取。所以本方法能够
     /// 影响绘制结果的状态**只有** `highlightRect` —— 它没变就意味着帧内容没变。
     override func mouseMoved(with event: NSEvent) {
+        desiredCursor.set()
         guard !isDragging, mode == .window else { return }
         let previousHighlight = highlightRect
         hoverWindowHit = resolveWindowHit()   // 副作用：写 highlightRect
@@ -350,6 +351,7 @@ class SelectionOverlayView: NSView {
     }
 
     override func mouseDragged(with event: NSEvent) {
+        desiredCursor.set()
         guard isDragging else { return }
         endPoint = globalPoint(for: event)
         guard let start = startPoint, let end = endPoint else { return }
@@ -438,10 +440,14 @@ class SelectionOverlayView: NSView {
 
     override func resetCursorRects() {
         super.resetCursorRects()
-        addCursorRect(bounds, cursor: mode == .rectangle || mode == .freeform ? .crosshair : .arrow)
+        addCursorRect(bounds, cursor: desiredCursor)
     }
 
+    override func cursorUpdate(with event: NSEvent) { desiredCursor.set() }
+
     // MARK: - Private helpers
+
+    private var desiredCursor: NSCursor { mode == .rectangle || mode == .freeform ? .crosshair : .arrow }
 
     private func globalPoint(for event: NSEvent) -> CGPoint? {
         window?.convertToScreen(CGRect(origin: event.locationInWindow, size: .zero)).origin
