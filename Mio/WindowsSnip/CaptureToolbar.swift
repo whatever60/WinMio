@@ -43,6 +43,10 @@ import SwiftUI
 
 @MainActor private final class CaptureToolbarHostingView: NSHostingView<CaptureToolbarView> {
   override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+  override func resetCursorRects() {
+    super.resetCursorRects()
+    addCursorRect(bounds, cursor: .arrow)
+  }
 }
 
 struct CaptureToolbarView: View {
