@@ -47,11 +47,12 @@ import SwiftUI
 
 struct CaptureToolbarView: View {
   @State var mode: CaptureMode
+  @State private var hoveredMode: CaptureMode?
   let onMode: (CaptureMode) -> Void
   let onCancel: () -> Void
 
   var body: some View {
-    HStack(spacing: 4) {
+    HStack(spacing: 0) {
       ForEach(CaptureMode.allCases) { mode in
         Button {
           self.mode = mode
@@ -59,14 +60,21 @@ struct CaptureToolbarView: View {
           onMode(mode)
         } label: {
           Image(systemName: mode.systemImage)
-            .frame(width: 38, height: 34)
+            .frame(width: 44, height: 40)
             .foregroundStyle(self.mode == mode ? Color.white : Color.primary)
             .background(
-              self.mode == mode ? Color.accentColor : Color.clear,
+              self.mode == mode
+                ? Color.accentColor
+                : hoveredMode == mode ? Color.primary.opacity(0.12) : Color.clear,
               in: RoundedRectangle(cornerRadius: 7))
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain).help(mode.title).accessibilityLabel(mode.title)
         .accessibilityAddTraits(self.mode == mode ? .isSelected : [])
+        .onHover { inside in
+          if inside { hoveredMode = mode }
+          else if hoveredMode == mode { hoveredMode = nil }
+        }
       }
       Divider().frame(height: 28).padding(.horizontal, 2)
       Button(action: onCancel) { Image(systemName: "xmark").frame(width: 34, height: 34) }
