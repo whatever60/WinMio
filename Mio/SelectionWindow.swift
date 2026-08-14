@@ -160,6 +160,7 @@ class SelectionWindow: NSWindow {
         }
         (overlayWindows.first { $0.frame.contains(NSEvent.mouseLocation) } ?? overlayWindows.first)?.makeKey()
         captureToolbar?.show()
+        updateCursor()
     }
 
     func hide() {
@@ -178,6 +179,7 @@ class SelectionWindow: NSWindow {
             window.ignoresMouseEvents = true
         }
         captureToolbar?.hide()
+        NSCursor.arrow.set()
     }
 
     private func showPreview(_ selection: VirtualDesktopSelection?) {
@@ -189,7 +191,12 @@ class SelectionWindow: NSWindow {
         showPreview(nil)
         overlayViews.forEach { $0.mode = mode }
         (overlayWindows.first { $0.frame.contains(NSEvent.mouseLocation) } ?? overlayWindows.first)?.makeKey()
+        updateCursor()
         if mode == .fullScreen { commitFullScreen() }
+    }
+
+    private func updateCursor() {
+        (mode == .rectangle || mode == .freeform ? NSCursor.crosshair : .arrow).set()
     }
 
     private func cancel() { selectionDelegate?.selectionWindowDidCancel(self) }
@@ -287,7 +294,7 @@ class SelectionOverlayView: NSView {
         if let trackingArea {
             removeTrackingArea(trackingArea)
         }
-        let options: NSTrackingArea.Options = [.mouseMoved, .activeAlways, .inVisibleRect]
+        let options: NSTrackingArea.Options = [.mouseMoved, .cursorUpdate, .activeAlways, .inVisibleRect]
         let area = NSTrackingArea(rect: .zero, options: options, owner: self, userInfo: nil)
         addTrackingArea(area)
         trackingArea = area
@@ -297,6 +304,10 @@ class SelectionOverlayView: NSView {
         super.resetCursorRects()
         let cursor: NSCursor = mode == .rectangle || mode == .freeform ? .crosshair : .arrow
         addCursorRect(bounds, cursor: cursor)
+    }
+
+    override func cursorUpdate(with event: NSEvent) {
+        (mode == .rectangle || mode == .freeform ? NSCursor.crosshair : .arrow).set()
     }
 
     // CRITICAL: Accept first mouse click even when app is not active
