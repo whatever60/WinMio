@@ -35,7 +35,7 @@ import SwiftUI
     let frame = screen.visibleFrame
     setFrameOrigin(
       NSPoint(x: frame.midX - self.frame.width / 2, y: frame.maxY - self.frame.height - 12))
-    makeKeyAndOrderFront(nil)
+    orderFrontRegardless()
   }
 
   func hide() { orderOut(nil) }
