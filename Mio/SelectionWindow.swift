@@ -29,7 +29,7 @@ final class OverlayWindow: NSPanel {
         )
 
         isFloatingPanel = true
-        becomesKeyOnlyIfNeeded = true
+        becomesKeyOnlyIfNeeded = false
         hidesOnDeactivate = false
     }
 
@@ -161,7 +161,7 @@ class SelectionWindow: NSWindow {
         captureToolbar?.show()
         (overlayWindows.first { $0.frame.contains(NSEvent.mouseLocation) } ?? overlayWindows.first)?.makeKey()
         overlayViews.forEach { $0.window?.invalidateCursorRects(for: $0) }
-        DispatchQueue.main.async { [weak self] in self?.updateCursor() }
+        updateCursor()
     }
 
     func hide() {
