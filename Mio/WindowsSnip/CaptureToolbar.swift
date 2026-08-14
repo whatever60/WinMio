@@ -95,5 +95,8 @@ struct CaptureToolbarView: View {
     .padding(6).frame(height: 52)
     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     .overlay { RoundedRectangle(cornerRadius: 14).stroke(.white.opacity(0.18)) }
+    .onContinuousHover { phase in
+      if case .active = phase { NSCursor.arrow.set() }
+    }
   }
 }

@@ -199,7 +199,8 @@ class SelectionWindow: NSWindow {
     }
 
     private func updateCursor() {
-        (mode == .rectangle || mode == .freeform ? NSCursor.crosshair : NSCursor.arrow).set()
+        let overToolbar = captureToolbar?.frame.contains(NSEvent.mouseLocation) == true
+        (overToolbar || (mode != .rectangle && mode != .freeform) ? NSCursor.arrow : .crosshair).set()
     }
 
     private func cancel() { selectionDelegate?.selectionWindowDidCancel(self) }
@@ -447,7 +448,12 @@ class SelectionOverlayView: NSView {
 
     // MARK: - Private helpers
 
-    private var desiredCursor: NSCursor { mode == .rectangle || mode == .freeform ? .crosshair : .arrow }
+    private var desiredCursor: NSCursor {
+        let overToolbar = NSApp.windows.contains {
+            $0 is CaptureToolbarPanel && $0.isVisible && $0.frame.contains(NSEvent.mouseLocation)
+        }
+        return overToolbar || (mode != .rectangle && mode != .freeform) ? .arrow : .crosshair
+    }
 
     private func globalPoint(for event: NSEvent) -> CGPoint? {
         window?.convertToScreen(CGRect(origin: event.locationInWindow, size: .zero)).origin
