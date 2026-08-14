@@ -199,7 +199,10 @@ class SelectionWindow: NSWindow {
     private func setSystemCursorHidden(_ hidden: Bool) {
         guard hidden != hidesSystemCursor else { return }
         hidesSystemCursor = hidden
-        hidden ? NSCursor.hide() : NSCursor.unhide()
+        for screen in NSScreen.screens {
+            guard let displayID = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID else { continue }
+            _ = hidden ? CGDisplayHideCursor(displayID) : CGDisplayShowCursor(displayID)
+        }
     }
 
     private func cancel() { selectionDelegate?.selectionWindowDidCancel(self) }
