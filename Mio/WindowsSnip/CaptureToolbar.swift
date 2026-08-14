@@ -48,6 +48,7 @@ import SwiftUI
 struct CaptureToolbarView: View {
   @State var mode: CaptureMode
   @State private var hoveredMode: CaptureMode?
+  @State private var closeHovered = false
   let onMode: (CaptureMode) -> Void
   let onCancel: () -> Void
 
@@ -78,8 +79,14 @@ struct CaptureToolbarView: View {
         }
       }
       Divider().frame(height: 28).padding(.horizontal, 2)
-      Button(action: onCancel) { Image(systemName: "xmark").frame(width: 34, height: 34) }
+      Button(action: onCancel) {
+        Image(systemName: "xmark").frame(width: 40, height: 40)
+          .background(closeHovered ? Color.primary.opacity(0.12) : Color.clear,
+                      in: RoundedRectangle(cornerRadius: 7))
+          .frame(width: 44, height: 40).contentShape(Rectangle())
+      }
         .buttonStyle(.plain).help("Close").accessibilityLabel("Close")
+        .onHover { closeHovered = $0 }
     }
     .padding(6).frame(height: 52)
     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
