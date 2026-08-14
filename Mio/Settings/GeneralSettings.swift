@@ -32,6 +32,8 @@ final class GeneralSettings: ObservableObject {
     }
 
     init() {
-        self.launchAtLogin = UserDefaults.standard.object(forKey: SettingsKeys.launchAtLogin) as? Bool ?? true
+        let enabled = UserDefaults.standard.object(forKey: SettingsKeys.launchAtLogin) as? Bool ?? true
+        self.launchAtLogin = enabled
+        Task { await LaunchAtLoginManager.shared.setEnabled(enabled) }
     }
 }

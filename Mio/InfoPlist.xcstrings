@@ -8,31 +8,31 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio"
+            "value" : "WinMio"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Mio"
+            "value" : "WinMio"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio"
+            "value" : "WinMio"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio"
+            "value" : "WinMio"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio"
+            "value" : "WinMio"
           }
         }
       }
@@ -44,31 +44,31 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio"
+            "value" : "WinMio"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Mio"
+            "value" : "WinMio"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio"
+            "value" : "WinMio"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio"
+            "value" : "WinMio"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio"
+            "value" : "WinMio"
           }
         }
       }
@@ -80,19 +80,19 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio benötigt die Bildschirmaufnahme-Berechtigung, um Screenshots aufzunehmen."
+            "value" : "WinMio benötigt die Bildschirmaufnahme-Berechtigung, um Screenshots aufzunehmen."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio needs screen recording permission to capture screenshots."
+            "value" : "WinMio needs screen recording permission to capture screenshots."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio nécessite l’autorisation d’enregistrement de l’écran pour prendre des captures."
+            "value" : "WinMio nécessite l’autorisation d’enregistrement de l’écran pour prendre des captures."
           }
         },
         "ja" : {
@@ -104,7 +104,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio 需要屏幕录制权限来进行截图。"
+            "value" : "WinMio 需要屏幕录制权限来进行截图。"
           }
         }
       }
@@ -115,19 +115,19 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio nutzt Mitteilungen, um abgeschlossene Aufnahmen zu bestätigen."
+            "value" : "WinMio nutzt Mitteilungen, um abgeschlossene Aufnahmen zu bestätigen."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio uses notifications to confirm captures are complete."
+            "value" : "WinMio uses notifications to confirm captures are complete."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio utilise des notifications pour confirmer la fin des captures."
+            "value" : "WinMio utilise des notifications pour confirmer la fin des captures."
           }
         },
         "ja" : {
@@ -139,7 +139,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio 会显示通知来确认截图完成。"
+            "value" : "WinMio 会显示通知来确认截图完成。"
           }
         }
       }

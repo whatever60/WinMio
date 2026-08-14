@@ -33,6 +33,10 @@ nonisolated enum CaptureFrameTheme: String, Codable, CaseIterable, Sendable, Ide
 
 @MainActor
 final class CaptureSettings: ObservableObject {
+    private static var defaultSaveFolder: String {
+        FileManager.default.urls(for: .picturesDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Screenshots").path
+    }
 
     /// Owns the security-scoped bookmark for the save folder and the
     /// NSOpenPanel modal. CaptureSettings persists the folder *path*; the
@@ -106,13 +110,14 @@ final class CaptureSettings: ObservableObject {
     /// True when both a folder path and a valid security-scoped bookmark are
     /// available (App Store compliance — Apple guideline 2.4.5(i)).
     var hasValidSaveFolder: Bool {
-        !saveFolderPath.isEmpty && hasValidBookmark
+        !saveFolderPath.isEmpty
+            && (hasValidBookmark || saveFolderPath == Self.defaultSaveFolder
+                || ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] == nil)
     }
 
     init() {
-        // No default path - user MUST select a folder via NSOpenPanel
-        // This complies with Apple guideline 2.4.5(i) - user-accessible storage
-        self.saveFolderPath = UserDefaults.standard.string(forKey: SettingsKeys.saveFolderPath) ?? ""
+        self.saveFolderPath = UserDefaults.standard.string(forKey: SettingsKeys.saveFolderPath)
+            ?? Self.defaultSaveFolder
 
         self.playSoundOnCapture = UserDefaults.standard.object(forKey: SettingsKeys.playSoundOnCapture) as? Bool ?? true
         self.saveToFile = UserDefaults.standard.object(forKey: SettingsKeys.saveToFile) as? Bool ?? true

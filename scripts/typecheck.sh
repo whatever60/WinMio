@@ -118,5 +118,5 @@ fi
 
 if (( QUIET == 0 )); then
   printf 'typecheck clean. Note: no generated symbols, no link, no packaging —\n'
-  printf 'run `xcodebuild -project Mio.xcodeproj -scheme Mio build` before committing.\n'
+  printf 'run `xcodebuild -project WinMio.xcodeproj -scheme WinMio build` before committing.\n'
 fi

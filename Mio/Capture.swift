@@ -340,15 +340,6 @@ public final class WindowCaptureService: Sendable {
     ) throws -> WindowHitTestResult {
         let skipPIDs: Set<pid_t> = skipSelfWindows ? [selfPID] : []
         let skipWindowIDs = excludingWindowIDs
-        let mainDisplayBounds = CGDisplayBounds(CGMainDisplayID())
-        let screenWidth = mainDisplayBounds.width
-        let screenHeight = mainDisplayBounds.height
-
-        // Guard against headless or zero-size display configurations
-        guard screenWidth > 0, screenHeight > 0 else {
-            throw WindowCaptureError.noWindowAtPoint
-        }
-
         // Quartz returns on-screen windows ordered front → back.
         let options: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements]
         guard let windowInfoList = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [[String: Any]] else {
@@ -400,11 +391,6 @@ public final class WindowCaptureService: Sendable {
             }
 
             if let ownerName, Self.systemProcessBlacklist.contains(ownerName) {
-                continue
-            }
-
-            // Skip full-screen overlays (e.g., Mission Control, spaces) that cover the whole display.
-            if quartzBounds.width >= screenWidth - 1 && quartzBounds.height >= screenHeight - 1 {
                 continue
             }
 
@@ -695,18 +681,13 @@ public actor FileOutputService {
         // Ensure destination directory exists
         try fileManager.createDirectory(at: folderURL, withIntermediateDirectories: true)
 
-        // Atomic write: write to temp, then replace
-        let tempURL = folderURL.appendingPathComponent(".mio_\(UUID().uuidString).tmp")
         do {
-            try data.write(to: tempURL)
-            _ = try fileManager.replaceItemAt(saveURL, withItemAt: tempURL)
+            try data.write(to: saveURL, options: .atomic)
             // Persist the *next* number to try, so the following capture
             // does not have to walk all existing files again.
             persistSequence(seq + 1)
             return saveURL.path
         } catch {
-            // Clean up temp file if it exists
-            try? fileManager.removeItem(at: tempURL)
             throw CaptureError(
                 "Failed to write screenshot to disk",
                 underlyingDescription: error.localizedDescription
@@ -902,42 +883,6 @@ public actor CapturePipeline {
         return FrozenAssets(screens: screens, windows: windows)
     }
 
-    /// 按需补抓单窗口的圆角透明图。**用户点击命中但 burst 未抓到时使用**——
-    /// 重新拉 SCShareableContent 找到对应 SCWindow，调 `captureWindow`。
-    ///
-    /// 与 burst 路径同语义：用 `desktopIndependentWindow` filter + `clear`
-    /// 背景 + `ignoreShadowsSingleWindow`，输出带 alpha 的真窗口图。
-    ///
-    /// 失败时**抛错**——调用方（CaptureCoordinator）应展示错误而不是 fallback
-    /// 到矩形 crop。fallback 会让用户拿到圆角外是壁纸的直角图，违反产品契约
-    /// "宁可多等也不要 fallback"。
-    ///
-    /// 性能：~30–80ms（一次 SCShareableContent + 一次 captureImage）。这个延迟
-    /// 仅在 burst 缓存 miss 时发生（z-order 较深、burst 超时、用户点了 burst
-    /// 没覆盖到的小窗口）；命中缓存的快路径不受影响。
-    public func captureWindowOnDemand(windowID: CGWindowID) async throws -> CaptureImage {
-        let content: SCShareableContent
-        do {
-            content = try await SCShareableContent.excludingDesktopWindows(
-                false,
-                onScreenWindowsOnly: true
-            )
-        } catch {
-            throw CaptureError(
-                NSLocalizedString("error.window_list_unavailable", comment: "SCShareableContent lookup failed"),
-                underlyingDescription: error.localizedDescription
-            )
-        }
-
-        guard let scWindow = content.windows.first(where: { $0.windowID == windowID }) else {
-            throw CaptureError(
-                NSLocalizedString("error.window_gone", comment: "Target window disappeared before on-demand capture")
-            )
-        }
-
-        return try await displayCapture.captureWindow(scWindow)
-    }
-
     /// 窗口 burst：并发抓取 z-order 前→后的前 N 个可见窗口。
     ///
     /// 始终从 z-order 前→后取窗口（SCK 默认顺序）。可见性判定基于 z-order 累
@@ -1036,58 +981,62 @@ public actor CapturePipeline {
     ///   intersects with the screen bounds and either returns the intersected
     ///   slice or throws if the intersection is empty.
     public func cropFrozenImage(
-        from frozen: CaptureImage,
-        screenFrame: CGRect,
-        rect: CGRect
+        from frozen: [CGDirectDisplayID: CaptureImage],
+        screenFrames: [CGDirectDisplayID: CGRect],
+        selection: VirtualDesktopSelection
     ) async throws -> CaptureImage {
-        guard rect.width > 0, rect.height > 0 else {
-            throw CaptureError("Invalid crop rect: \(rect)")
+        let points: [CGPoint]?
+        let requested: CGRect
+        switch selection {
+        case .rectangle(let rect):
+            requested = rect.standardized
+            points = nil
+        case .freeform(let path):
+            guard path.count > 2 else { throw CaptureError("Invalid freeform selection") }
+            points = path
+            requested = path.reduce(CGRect.null) { $0.union(CGRect(origin: $1, size: .zero)) }
         }
-
-        let scale = frozen.scale
-
-        // AppKit (bottom-left origin) → screen-local point coordinates.
-        let offsetX = rect.origin.x - screenFrame.origin.x
-        let offsetY = rect.origin.y - screenFrame.origin.y
-        // Convert screen-local AppKit point to CGImage (top-left origin) point.
-        let flippedY = screenFrame.height - offsetY - rect.height
-
-        // Convert points → pixels using the screen's scale factor.
-        let pixelRect = CGRect(
-            x: offsetX * scale,
-            y: flippedY * scale,
-            width: rect.width * scale,
-            height: rect.height * scale
-        )
-
-        // Intersect with the cgImage pixel bounds as a safety net for cases
-        // where rect drifted slightly outside the screen due to upstream
-        // coordinate rounding.
-        let imageBounds = CGRect(
-            x: 0,
-            y: 0,
-            width: frozen.cgImage.width,
-            height: frozen.cgImage.height
-        )
-        let clippedPixelRect = pixelRect.intersection(imageBounds)
-        guard !clippedPixelRect.isNull,
-              clippedPixelRect.width > 0,
-              clippedPixelRect.height > 0
-        else {
-            throw CaptureError("Selection is completely outside screen bounds")
+        let contributors = screenFrames.compactMap { id, frame -> (CaptureImage, CGRect, CGRect)? in
+            let visible = requested.intersection(frame)
+            guard visible.width > 0, visible.height > 0, let image = frozen[id] else { return nil }
+            return (image, frame, visible)
         }
-
-        guard let cropped = frozen.cgImage.cropping(to: clippedPixelRect) else {
-            throw CaptureError("CGImage cropping failed")
+        guard let first = contributors.first else { throw CaptureError("Selection is outside every screen") }
+        let bounds = contributors.dropFirst().reduce(first.2) { $0.union($1.2) }
+        let scale = contributors.map(\.0.scale).max() ?? 1
+        let width = Int(ceil(bounds.width * scale)), height = Int(ceil(bounds.height * scale))
+        guard width > 0, height > 0,
+              let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+                                      space: CGColorSpaceCreateDeviceRGB(),
+                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { throw CaptureError("Unable to create virtual desktop image") }
+        func local(_ point: CGPoint) -> CGPoint {
+            CGPoint(x: (point.x - bounds.minX) * scale, y: (point.y - bounds.minY) * scale)
         }
-
-        // Map the (possibly clipped) pixel rect back into points for the
-        // CaptureImage size metadata.
-        let pointSize = CGSize(
-            width: clippedPixelRect.width / scale,
-            height: clippedPixelRect.height / scale
-        )
-        return CaptureImage(cgImage: cropped, scale: scale, size: pointSize)
+        func local(_ rect: CGRect) -> CGRect {
+            CGRect(origin: local(rect.origin),
+                   size: CGSize(width: rect.width * scale, height: rect.height * scale))
+        }
+        if let points {
+            let path = CGMutablePath()
+            path.move(to: local(points[0]))
+            points.dropFirst().forEach { path.addLine(to: local($0)) }
+            path.closeSubpath()
+            context.addPath(path)
+            context.clip()
+        }
+        if points == nil {
+            context.setFillColor(CGColor(gray: 0, alpha: 1))
+            context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+        }
+        for (image, frame, visible) in contributors {
+            context.saveGState()
+            context.clip(to: local(visible))
+            context.draw(image.cgImage, in: local(frame))
+            context.restoreGState()
+        }
+        guard let image = context.makeImage() else { throw CaptureError("Virtual desktop composition failed") }
+        return CaptureImage(cgImage: image, scale: scale, size: bounds.size)
     }
 
     /// Output tail: frame composite (when enabled) → file write (when enabled) →
@@ -1123,14 +1072,16 @@ public actor CapturePipeline {
         // so the zero-cost path is preserved.
         let image = frameConfig.map { FrameRenderer.compose(image: image, config: $0) } ?? image
 
-        // File output (must happen before clipboard for the saved-path event).
-        // The file output service owns the on-disk sequence counter internally.
-        // Skipped entirely when the user toggles `saveToFile` off — clipboard
-        // remains the only sink in that case.
+        // Attempt both outputs independently: a disk failure must never prevent
+        // the captured image from reaching the clipboard.
         var filePath: String?
+        var fileError: Error?
         if config.saveToFile && config.hasValidSaveFolder {
-            filePath = try await fileOutput.write(image: image, config: config)
-            try Task.checkCancellation()
+            do {
+                filePath = try await fileOutput.write(image: image, config: config)
+            } catch {
+                fileError = error
+            }
         }
 
         // Clipboard output (async call automatically hops to @MainActor implementation)
@@ -1148,6 +1099,7 @@ public actor CapturePipeline {
             eventBus.emit(.savedToFile(path: filePath))
         }
         eventBus.emit(.copiedToClipboard)
+        if let fileError { throw fileError }
     }
 }
 
@@ -1253,7 +1205,8 @@ public final class CaptureCoordinator: SelectionWindowDelegate, ScreenChooserWin
 
                 let window = SelectionWindow(
                     frozenScreens: assets.screens,
-                    overlayConfiguration: .screenshot
+                    overlayConfiguration: .screenshot,
+                    mode: CaptureMode.last
                 )
                 window.selectionDelegate = self
                 window.show()
@@ -1347,12 +1300,21 @@ public final class CaptureCoordinator: SelectionWindowDelegate, ScreenChooserWin
 
     // MARK: SelectionWindowDelegate
 
-    func selectionWindow(_ window: SelectionWindow, didSelectRect rect: CGRect) {
-        handleSelectedRect(rect)
+    func selectionWindow(_ window: SelectionWindow, didSelect selection: VirtualDesktopSelection) {
+        handleSelectedSelection(selection)
     }
 
     func selectionWindow(_ window: SelectionWindow, didSelectWindow windowResult: WindowHitTestResult) {
         handleSelectedWindow(windowResult)
+    }
+
+    func selectionWindowDidSelectFullScreen(_ window: SelectionWindow) {
+        guard let frames = screenFrames, let first = frames.values.first else {
+            cleanupFlow()
+            return
+        }
+        let desktop = frames.values.dropFirst().reduce(first) { $0.union($1) }
+        handleSelectedSelection(.rectangle(desktop))
     }
 
     func selectionWindowDidCancel(_ window: SelectionWindow) {
@@ -1412,7 +1374,7 @@ public final class CaptureCoordinator: SelectionWindowDelegate, ScreenChooserWin
     /// time and only calls `cleanupFlow` if the generation is still current
     /// — preventing a stale Task from clobbering a flow the user has
     /// cancelled and restarted in the meantime.
-    private func handleSelectedRect(_ rect: CGRect) {
+    private func handleSelectedSelection(_ selection: VirtualDesktopSelection) {
         selectionWindow?.hide()
 
         guard let frozen = frozenScreens, let frames = screenFrames else {
@@ -1420,18 +1382,16 @@ public final class CaptureCoordinator: SelectionWindowDelegate, ScreenChooserWin
             return
         }
 
-        // Anchor the rect to the screen containing its center point
-        // (PRODUCT.md §10: cross-screen windows are normalized by center).
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        guard let match = frames.first(where: { $0.value.contains(center) }),
-              let frozenImage = frozen[match.key]
-        else {
-            showCaptureError(CaptureError("Selection outside any screen"))
-            cleanupFlow()
-            return
+        let selectionBounds: CGRect = switch selection {
+        case .rectangle(let rect): rect
+        case .freeform(let points): points.reduce(CGRect.null) { $0.union(CGRect(origin: $1, size: .zero)) }
         }
-        let screenFrame = match.value
-        let displayID = match.key
+        func visibleArea(_ frame: CGRect) -> CGFloat {
+            let intersection = frame.intersection(selectionBounds)
+            return intersection.width * intersection.height
+        }
+        let displayID = frames.max { visibleArea($0.value) < visibleArea($1.value) }?.key
+            ?? CGMainDisplayID()
 
         let config = makeCaptureConfiguration()
         let frameConfig = makeFrameConfiguration()
@@ -1442,9 +1402,9 @@ public final class CaptureCoordinator: SelectionWindowDelegate, ScreenChooserWin
             guard let self else { return }
             do {
                 let cropped = try await pipeline.cropFrozenImage(
-                    from: frozenImage,
-                    screenFrame: screenFrame,
-                    rect: rect
+                    from: frozen,
+                    screenFrames: frames,
+                    selection: selection
                 )
                 switch kind {
                 case .directOutput:
@@ -1452,7 +1412,7 @@ public final class CaptureCoordinator: SelectionWindowDelegate, ScreenChooserWin
                     try await pipeline.finishOutput(
                         image: cropped,
                         config: config,
-                        frameConfig: frameConfig
+                        frameConfig: nil
                     )
                 case .intoEditor:
                     // 路径 D：跳过 finishOutput，把裁好的图交给编辑器窗口。
@@ -1493,10 +1453,8 @@ public final class CaptureCoordinator: SelectionWindowDelegate, ScreenChooserWin
     /// 窗口点选处理（PRODUCT v5 §2.3）：优先用按键瞬间 burst 抓的圆角透明窗口图。
     ///
     /// 缓存命中：直接用 burst 图，瞬时输出。
-    /// 缓存未命中（z-order 较深 / burst 超时 / burst 失败 / 用户点了 burst 没覆盖
-    /// 的小窗口）：**同步按需补抓**——重新调 SCK 拿一张真窗口图，~30–80ms 延迟。
-    /// **不 fallback 到矩形裁剪**——用户点击窗口期望的是带 alpha 的真窗口图，
-    /// 拿到圆角外是壁纸的直角图违反产品契约。"宁可多等也不要 fallback。"
+    /// 缓存未命中时从按键瞬间冻结的桌面图裁出窗口边界。这样动画或视频不会
+    /// 在用户选择窗口期间继续前进；代价是窗口当时的遮挡也会忠实保留。
     private func handleSelectedWindow(_ result: WindowHitTestResult) {
         selectionWindow?.hide()
 
@@ -1512,7 +1470,8 @@ public final class CaptureCoordinator: SelectionWindowDelegate, ScreenChooserWin
         }
 
         let cached = frozenWindows[result.windowID]
-        let windowID = result.windowID
+        let frozen = frozenScreens
+        let frames = screenFrames
         let config = makeCaptureConfiguration()
         let frameConfig = makeFrameConfiguration()
         let myGeneration = flowGeneration
@@ -1521,12 +1480,18 @@ public final class CaptureCoordinator: SelectionWindowDelegate, ScreenChooserWin
         Task { [weak self] in
             guard let self else { return }
             do {
-                // 缓存命中走快路径；未命中按需补抓
+                // 缓存命中走透明窗口快路径；未命中仍使用冻结时刻的桌面图。
                 let windowImage: CaptureImage
                 if let cached {
                     windowImage = cached
+                } else if let frozen, let frames {
+                    windowImage = try await pipeline.cropFrozenImage(
+                        from: frozen,
+                        screenFrames: frames,
+                        selection: .rectangle(result.bounds)
+                    )
                 } else {
-                    windowImage = try await pipeline.captureWindowOnDemand(windowID: windowID)
+                    throw CaptureError("Frozen window image is unavailable")
                 }
 
                 // 异步路径完成后必须 re-check generation：用户可能 ESC + 重启 flow
@@ -1538,7 +1503,7 @@ public final class CaptureCoordinator: SelectionWindowDelegate, ScreenChooserWin
                     try await pipeline.finishOutput(
                         image: windowImage,
                         config: config,
-                        frameConfig: frameConfig
+                        frameConfig: nil
                     )
                 case .intoEditor:
                     if self.flowGeneration == myGeneration {

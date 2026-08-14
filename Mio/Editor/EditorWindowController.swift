@@ -40,7 +40,7 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = "Mio"
+        window.title = "WinMio"
         // 红圆 / ⌘W = 取消（不弹「是否保存」对话框，符合 Mio 极简）
 
         super.init(window: window)

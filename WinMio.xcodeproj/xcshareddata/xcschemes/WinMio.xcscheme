@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "160D2D552ECCB91300A25E82"
-               BuildableName = "Mio.app"
-               BlueprintName = "Mio"
-               ReferencedContainer = "container:Mio.xcodeproj">
+               BuildableName = "WinMio.app"
+               BlueprintName = "WinMio"
+               ReferencedContainer = "container:WinMio.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "160D2D552ECCB91300A25E82"
-            BuildableName = "Mio.app"
-            BlueprintName = "Mio"
-            ReferencedContainer = "container:Mio.xcodeproj">
+            BuildableName = "WinMio.app"
+            BlueprintName = "WinMio"
+            ReferencedContainer = "container:WinMio.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -62,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "160D2D552ECCB91300A25E82"
-            BuildableName = "Mio.app"
-            BlueprintName = "Mio"
-            ReferencedContainer = "container:Mio.xcodeproj">
+            BuildableName = "WinMio.app"
+            BlueprintName = "WinMio"
+            ReferencedContainer = "container:WinMio.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

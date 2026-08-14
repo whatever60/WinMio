@@ -649,31 +649,31 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio benötigt Bedienungshilfen, um globale Kurzbefehle zu registrieren.\n\nGehe zu Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen und erlaube Mio."
+            "value" : "WinMio benötigt Bedienungshilfen, um globale Kurzbefehle zu registrieren.\n\nGehe zu Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen und erlaube WinMio."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio needs Accessibility to register global shortcuts.\n\nGo to System Settings → Privacy & Security → Accessibility and allow Mio."
+            "value" : "WinMio needs Accessibility to register global shortcuts.\n\nGo to System Settings → Privacy & Security → Accessibility and allow WinMio."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio a besoin de l’accessibilité pour enregistrer des raccourcis globaux.\n\nAllez dans Réglages Système → Confidentialité et sécurité → Accessibilité et autorisez Mio."
+            "value" : "WinMio a besoin de l’accessibilité pour enregistrer des raccourcis globaux.\n\nAllez dans Réglages Système → Confidentialité et sécurité → Accessibilité et autorisez WinMio."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "グローバルショートカットを登録するにはアクセシビリティの許可が必要です。\n\nシステム設定 → プライバシーとセキュリティ → アクセシビリティで Mio を許可してください。"
+            "value" : "グローバルショートカットを登録するにはアクセシビリティの許可が必要です。\n\nシステム設定 → プライバシーとセキュリティ → アクセシビリティで WinMio を許可してください。"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio 需要辅助功能权限以注册全局快捷键。\n\n前往“系统设置 → 隐私与安全性 → 辅助功能”并允许 Mio。"
+            "value" : "WinMio 需要辅助功能权限以注册全局快捷键。\n\n前往“系统设置 → 隐私与安全性 → 辅助功能”并允许 WinMio。"
           }
         }
       }
@@ -967,31 +967,31 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio benötigt die Berechtigung Bildschirmaufnahme, um Bildschirmfotos aufzunehmen.\n\nGehe zu Systemeinstellungen → Datenschutz & Sicherheit → Bildschirmaufnahme und erlaube Mio."
+            "value" : "WinMio benötigt die Berechtigung Bildschirmaufnahme, um Bildschirmfotos aufzunehmen.\n\nGehe zu Systemeinstellungen → Datenschutz & Sicherheit → Bildschirmaufnahme und erlaube WinMio."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio needs Screen Recording permission to capture.\n\nGo to System Settings → Privacy & Security → Screen Recording and allow Mio."
+            "value" : "WinMio needs Screen Recording permission to capture.\n\nGo to System Settings → Privacy & Security → Screen Recording and allow WinMio."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio a besoin de l’autorisation d’enregistrement d’écran pour capturer.\n\nAllez dans Réglages Système → Confidentialité et sécurité → Enregistrement de l’écran et autorisez Mio."
+            "value" : "WinMio a besoin de l’autorisation d’enregistrement d’écran pour capturer.\n\nAllez dans Réglages Système → Confidentialité et sécurité → Enregistrement de l’écran et autorisez WinMio."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio でキャプチャするには画面収録の許可が必要です。\n\nシステム設定 → プライバシーとセキュリティ → 画面収録で Mio を許可してください。"
+            "value" : "WinMio でキャプチャするには画面収録の許可が必要です。\n\nシステム設定 → プライバシーとセキュリティ → 画面収録で WinMio を許可してください。"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio 需要屏幕录制权限才能截图。\n\n前往“系统设置 → 隐私与安全性 → 屏幕录制”并允许 Mio。"
+            "value" : "WinMio 需要屏幕录制权限才能截图。\n\n前往“系统设置 → 隐私与安全性 → 屏幕录制”并允许 WinMio。"
           }
         }
       }
@@ -1038,31 +1038,31 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio konnte nicht gestartet werden"
+            "value" : "WinMio konnte nicht gestartet werden"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Unable to launch Mio"
+            "value" : "Unable to launch WinMio"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Impossible de lancer Mio"
+            "value" : "Impossible de lancer WinMio"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio を起動できません"
+            "value" : "WinMio を起動できません"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "无法启动 Mio"
+            "value" : "无法启动 WinMio"
           }
         }
       }
@@ -1792,36 +1792,36 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio beenden"
+            "value" : "WinMio beenden"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Quit Mio"
+            "value" : "Quit WinMio"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Quitter Mio"
+            "value" : "Quitter WinMio"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio を終了"
+            "value" : "WinMio を終了"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "退出 Mio"
+            "value" : "退出 WinMio"
           }
         }
       }
     },
-    "Mio" : {
+    "WinMio" : {
 
     },
     "onboarding.button.back" : {
@@ -2839,31 +2839,31 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio kopiert immer in die Zwischenablage. Wähle, ob zusätzlich eine PNG-Datei gespeichert werden soll."
+            "value" : "WinMio kopiert immer in die Zwischenablage. Wähle, ob zusätzlich eine PNG-Datei gespeichert werden soll."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio always copies to the clipboard. Choose whether to also save a PNG file."
+            "value" : "WinMio always copies to the clipboard. Choose whether to also save a PNG file."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio copie toujours dans le presse-papiers. Choisissez si un fichier PNG doit aussi être enregistré."
+            "value" : "WinMio copie toujours dans le presse-papiers. Choisissez si un fichier PNG doit aussi être enregistré."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio は常にクリップボードへコピーします。PNG ファイルも残すかどうかを選んでください。"
+            "value" : "WinMio は常にクリップボードへコピーします。PNG ファイルも残すかどうかを選んでください。"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mio 始终复制到剪贴板。下面这一项决定是否同时保留 PNG 文件。"
+            "value" : "WinMio 始终复制到剪贴板。下面这一项决定是否同时保留 PNG 文件。"
           }
         }
       }

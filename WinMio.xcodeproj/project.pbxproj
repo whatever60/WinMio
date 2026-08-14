@@ -14,17 +14,17 @@
 		C0DEC0DEC0DEC0DEC0DEC001 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 		C0DEC0DEC0DEC0DEC0DEC002 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		C0DEC0DEC0DEC0DEC0DEC003 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
-		C77B53A22FBE225F003FDC61 /* Mio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mio.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C77B53A22FBE225F003FDC61 /* WinMio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WinMio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C77B57152FC00DCA003FDC61 /* Mio.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Mio.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		C7224CB22EF2FA88000E28C8 /* Exceptions for "Mio" folder in "Mio" target */ = {
+		C7224CB22EF2FA88000E28C8 /* Exceptions for "Mio" folder in "WinMio" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"Info-AppStore.plist",
 			);
-			target = 160D2D552ECCB91300A25E82 /* Mio */;
+			target = 160D2D552ECCB91300A25E82 /* WinMio */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -32,7 +32,7 @@
 		16C553432EB8AF3F008745D0 /* Mio */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				C7224CB22EF2FA88000E28C8 /* Exceptions for "Mio" folder in "Mio" target */,
+				C7224CB22EF2FA88000E28C8 /* Exceptions for "Mio" folder in "WinMio" target */,
 			);
 			path = Mio;
 			sourceTree = "<group>";
@@ -55,7 +55,7 @@
 			children = (
 				16C553432EB8AF3F008745D0 /* Mio */,
 				C0DEC0DEC0DEC0DEC0DEC004 /* Config */,
-				C77B53A22FBE225F003FDC61 /* Mio.app */,
+				C77B53A22FBE225F003FDC61 /* WinMio.app */,
 				C77B57152FC00DCA003FDC61 /* Mio.icon */,
 			);
 			sourceTree = "<group>";
@@ -73,9 +73,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		160D2D552ECCB91300A25E82 /* Mio */ = {
+		160D2D552ECCB91300A25E82 /* WinMio */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 160D2D5C2ECCB91300A25E82 /* Build configuration list for PBXNativeTarget "Mio" */;
+			buildConfigurationList = 160D2D5C2ECCB91300A25E82 /* Build configuration list for PBXNativeTarget "WinMio" */;
 			buildPhases = (
 				160D2D582ECCB91300A25E82 /* Sources */,
 				160D2D592ECCB91300A25E82 /* Frameworks */,
@@ -88,9 +88,9 @@
 			fileSystemSynchronizedGroups = (
 				16C553432EB8AF3F008745D0 /* Mio */,
 			);
-			name = Mio;
-			productName = Mio;
-			productReference = C77B53A22FBE225F003FDC61 /* Mio.app */;
+			name = WinMio;
+			productName = WinMio;
+			productReference = C77B53A22FBE225F003FDC61 /* WinMio.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -103,7 +103,7 @@
 				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2640;
 			};
-			buildConfigurationList = 16C5533C2EB8AF3F008745D0 /* Build configuration list for PBXProject "Mio" */;
+			buildConfigurationList = 16C5533C2EB8AF3F008745D0 /* Build configuration list for PBXProject "WinMio" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -121,7 +121,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				160D2D552ECCB91300A25E82 /* Mio */,
+				160D2D552ECCB91300A25E82 /* WinMio */,
 			);
 		};
 /* End PBXProject section */
@@ -156,8 +156,8 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				DEAD_CODE_STRIPPING = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.iSoldLeo.Mio;
-				PRODUCT_NAME = Mio;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.whatever60.WinMio;
+				PRODUCT_NAME = WinMio;
 			};
 			name = Debug;
 		};
@@ -169,8 +169,8 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				DEAD_CODE_STRIPPING = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.iSoldLeo.Mio;
-				PRODUCT_NAME = Mio;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.whatever60.WinMio;
+				PRODUCT_NAME = WinMio;
 			};
 			name = Release;
 		};
@@ -209,7 +209,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 29JVTLN6CG;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -226,7 +226,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MTL_FAST_MATH = YES;
-				PRODUCT_NAME = Mio;
+				PRODUCT_NAME = WinMio;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -266,7 +266,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 29JVTLN6CG;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -278,7 +278,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MTL_FAST_MATH = YES;
-				PRODUCT_NAME = Mio;
+				PRODUCT_NAME = WinMio;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -286,7 +286,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		160D2D5C2ECCB91300A25E82 /* Build configuration list for PBXNativeTarget "Mio" */ = {
+		160D2D5C2ECCB91300A25E82 /* Build configuration list for PBXNativeTarget "WinMio" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				160D2D5D2ECCB91300A25E82 /* Debug */,
@@ -295,7 +295,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		16C5533C2EB8AF3F008745D0 /* Build configuration list for PBXProject "Mio" */ = {
+		16C5533C2EB8AF3F008745D0 /* Build configuration list for PBXProject "WinMio" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				16C5534A2EB8AF3F008745D0 /* Debug */,

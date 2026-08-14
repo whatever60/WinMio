@@ -23,9 +23,9 @@ nonisolated public struct HotKey: Codable, Equatable, Sendable {
     public static let unset = HotKey(keyCode: 0, modifiers: 0, characters: nil)
 
     public static let defaultWindowCapture = HotKey(
-        keyCode: 1,
-        modifiers: NSEvent.ModifierFlags([.option, .command]).rawValue,
-        characters: "s"
+        keyCode: 80,
+        modifiers: 0,
+        characters: nil
     )
 
     public static let defaultFullScreen = HotKey(

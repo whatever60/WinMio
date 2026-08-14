@@ -15,7 +15,7 @@ struct MioApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        MenuBarExtra("Mio", systemImage: "camera.viewfinder") {
+        MenuBarExtra("WinMio", systemImage: "camera.viewfinder") {
             MenuBarContentView(app: appDelegate)
         }
 
@@ -33,7 +33,7 @@ struct MioApp: App {
         // 需要自绘圆角/阴影/拖拽/焦点，反而绕开 Tahoe 原生窗口外观。
         // 这里保留默认窗口样式，只移除标题文字和 toolbar 背板，让内容延展
         // 到顶部；圆角、阴影、focus、拖拽与系统背景全部交给系统。
-        Window("Mio", id: "onboarding") {
+        Window("WinMio", id: "onboarding") {
             OnboardingView()
                 .environmentObject(AppSettings.shared.hotkey)
                 .environmentObject(AppSettings.shared.capture)
@@ -110,6 +110,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
 
         if OnboardingPresenter.shouldShowOnLaunch {
             OnboardingPresenter.shared.show()
+        }
+
+        if ProcessInfo.processInfo.arguments.contains("--capture") {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.takeScreenshot()
+            }
         }
     }
 
